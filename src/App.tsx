@@ -14,6 +14,7 @@ import { ShippingPolicy } from './pages/ShippingPolicy';
 import { RefundPolicy } from './pages/RefundPolicy';
 import { Checkout } from './pages/Checkout';
 import { OrderSuccess } from './pages/OrderSuccess';
+import { AdminOrders } from './pages/AdminOrders';
 
 // Scroll to top on route change helper
 const ScrollToTop: React.FC = () => {
@@ -47,6 +48,7 @@ const AppContent: React.FC = () => {
           <Route path="/refund-policy" element={<RefundPolicy />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-success" element={<OrderSuccess />} />
+          <Route path="/admin" element={<AdminOrders />} />
         </Routes>
       </main>
 

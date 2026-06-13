@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { RazorpayModal } from '../components/RazorpayModal';
 import { ArrowLeft, ShieldCheck, Mail, Phone, User, MapPin, CreditCard, Lock, HelpCircle } from 'lucide-react';
+import { createOrder } from '../lib/orders';
 
 export const Checkout: React.FC = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -137,7 +138,7 @@ export const Checkout: React.FC = () => {
     document.body.appendChild(script);
   };
 
-  const handlePaymentSuccess = (paymentId: string) => {
+  const handlePaymentSuccess = async (paymentId: string) => {
     setIsRazorpayOpen(false);
 
     // Save order details to sessionStorage to display on success page
@@ -158,6 +159,21 @@ export const Checkout: React.FC = () => {
         minute: '2-digit',
       }),
     };
+
+    const { error } = await createOrder({
+      orderId,
+      paymentId,
+      customer: formData,
+      items: cartItems,
+      subtotal: cartTotal,
+      shippingFee,
+      total: grandTotal,
+    });
+
+    if (error) {
+      console.error('Failed to save order to Supabase:', error);
+      alert('Payment succeeded, but we could not save the order online. Please contact NEVA support with your payment ID.');
+    }
 
     sessionStorage.setItem('neva_latest_order', JSON.stringify(orderData));
 
