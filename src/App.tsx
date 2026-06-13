@@ -64,7 +64,7 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/">
       <CartProvider>
         <AppContent />
       </CartProvider>
