@@ -19,7 +19,7 @@ import {
   X
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import bannerImage from '../assets/banner.PNG';
+import heroImage from '../assets/hero-bg.jpg';
 import beforeAfterOne from '../assets/b-a1.JPG';
 import beforeAfterTwo from '../assets/b-a2.JPG';
 import beforeAfterThree from '../assets/b-a3.JPG';
@@ -76,7 +76,7 @@ export const Home: React.FC = () => {
         {/* Background Image Overlay */}
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/hero-bg.jpg"
+            src={heroImage}
             alt="NEVA skincare banner"
             className="w-full h-full object-cover object-center opacity-30 scale-105 transform motion-safe:animate-pulse"
             style={{ animationDuration: '8s' }}

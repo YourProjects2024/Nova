@@ -1,3 +1,6 @@
+import faceWashImage from '../assets/facewash.png';
+import moisturizerImage from '../assets/moisturizer.png';
+
 export interface Review {
   id: string;
   heading: string;
@@ -44,7 +47,7 @@ export const PRODUCTS: Product[] = [
       'Ideal for all skin types'
     ],
     weight: '30 ML',
-    image: '/images/facewash.png',
+    image: faceWashImage,
     description: 'Say goodbye to breakouts with our deep cleansing Facewash. Expertly formulated to target acne, blackheads, and clogged pores, this gentle yet powerful cleanser penetrates deep into the skin to remove excess oil, dirt, and dead skin cells. Enriched with Salicylic Acid (BHA), it helps reduce acne while promoting a clearer, healthier complexion. Designed for daily use on acne-prone skin, it leaves your face feeling fresh, clean, and balanced without over-drying.',
     detailedBenefits: [
       'Unclogs Pores: Salicylic acid penetrates deep to clear pores, reducing blackheads and whiteheads.',
@@ -197,7 +200,7 @@ export const PRODUCTS: Product[] = [
       'Improves texture & tone'
     ],
     weight: '50 GM',
-    image: '/images/moisturizer.png',
+    image: moisturizerImage,
     description: 'Neva Intense night Cream works overnight to target dark spots, acne marks, and pigmentation while you sleep. It is formulated to help even out skin tone and enhance your natural glow for a brighter, healthier-looking complexion. Lightweight yet effective, it helps rejuvenate and restore your skin through the night. Suitable for both men and women, it fits perfectly into any night time skincare routine.',
     detailedBenefits: [
       'Reduces Dark Spots & Pigmentation: Helps fade stubborn spots and uneven patches.',
