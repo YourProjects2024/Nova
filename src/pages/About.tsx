@@ -1,5 +1,6 @@
 import React from 'react';
 import { Leaf, Award, ShieldCheck, Instagram, Facebook, Youtube, Sparkles } from 'lucide-react';
+import heroImage from '../assets/hero-bg.jpg';
 
 export const About: React.FC = () => {
   return (
@@ -8,7 +9,7 @@ export const About: React.FC = () => {
       <div className="relative bg-sage-800 text-cream-50 py-20 px-4 text-center overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <img
-            src="/images/hero-bg.jpg"
+            src= {heroImage}
             alt="Organic ingredients background"
             className="w-full h-full object-cover"
           />
