@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand Colors */
+  --color-sage-50: #f4f6f4;
+  --color-sage-100: #e9ece9;
+  --color-sage-200: #d3dad3;
+  --color-sage-300: #b0beb0;
+  --color-sage-400: #889d88;
+  --color-sage-500: #5f7464;
+  --color-sage-600: #4a5d4e;
+  --color-sage-700: #3b4a3e;
+  --color-sage-800: #303c32;
+  --color-sage-900: #1c241d;
+  
+  --color-cream-50: #fdfbf7;
+  --color-cream-100: #f7f3e9;
+  --color-cream-200: #eee5d3;
+  --color-cream-300: #ddcfb5;
+  
+  --color-gold-50: #faf7f2;
+  --color-gold-100: #f3ebd9;
+  --color-gold-200: #e5d7b5;
+  --color-gold-300: #d3be8c;
+  --color-gold-400: #c1a364;
+  --color-gold-500: #b59253;
+  --color-gold-600: #9c783e;
+  --color-gold-700: #7e5c2f;
+  --color-gold-800: #624626;
+  --color-gold-900: #4a351e;
+
+  /* Custom Animations */
+  --animate-fadeIn: fadeIn 0.3s ease-out forwards;
+  --animate-shake: shake 0.4s ease-in-out;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+}
+
+/* Custom Utilities */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbars for sliders but keep scrollability */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Smooth fade-in utility */
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
