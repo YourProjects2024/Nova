@@ -49,12 +49,6 @@ export const Home: React.FC = () => {
     setTimeout(() => setAddedProductId(null), 2000);
   };
 
-  const handleWhatsAppBuy = (product: Product) => {
-    const phoneNumber = '919998318359';
-    const message = encodeURIComponent(`Hi NEVA team, I want to buy ${product.name}.`);
-    window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
-  };
-
   const handleOpenProduct = (product: Product) => {
     setActiveTab('description');
     setSelectedProduct(product);
@@ -224,7 +218,7 @@ export const Home: React.FC = () => {
                     <span className="text-sm line-through text-sage-400">₹{product.originalPrice}</span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
                     {/* Add to Cart */}
                     <button
                       onClick={(event) => {
@@ -248,18 +242,6 @@ export const Home: React.FC = () => {
                           <span>Add to Cart</span>
                         </>
                       )}
-                    </button>
-
-                    {/* Buy on WhatsApp */}
-                    <button
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleWhatsAppBuy(product);
-                      }}
-                      className="w-full bg-[#25D366] hover:bg-[#20ba59] text-white py-3 px-4 rounded-xl text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                    >
-                      <MessageCircle className="w-4 h-4 fill-current" />
-                      <span>WhatsApp Buy</span>
                     </button>
                   </div>
                 </div>
@@ -593,14 +575,6 @@ export const Home: React.FC = () => {
                     )}
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => handleWhatsAppBuy(selectedProduct)}
-                    className="flex-1 bg-[#25D366] hover:bg-[#20ba59] text-white py-4 px-6 rounded-xl font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer"
-                  >
-                    <MessageCircle className="w-5 h-5 fill-current" />
-                    <span>Buy on WhatsApp</span>
-                  </button>
                 </div>
               </div>
             </div>

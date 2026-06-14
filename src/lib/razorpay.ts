@@ -2,7 +2,10 @@ import { supabase } from './supabase';
 
 declare global {
   interface Window {
-    Razorpay?: new (options: RazorpayCheckoutOptions) => { open: () => void };
+    Razorpay?: new (options: RazorpayCheckoutOptions) => {
+      on?: (event: 'payment.failed', handler: (response: unknown) => void) => void;
+      open: () => void;
+    };
   }
 }
 
@@ -20,6 +23,7 @@ interface RazorpayCheckoutOptions {
   description: string;
   image?: string;
   order_id: string;
+  method?: 'card' | 'netbanking' | 'wallet' | 'upi' | 'emi';
   prefill: {
     name: string;
     email: string;
@@ -36,7 +40,7 @@ interface RazorpayCheckoutOptions {
 }
 
 export interface RazorpayOrder {
-  id: string;
+  order_id: string;
   amount: number;
   currency: string;
 }
@@ -65,15 +69,15 @@ export const loadRazorpayCheckout = () => {
   return razorpayScriptPromise;
 };
 
-export const createRazorpayOrder = async (amount: number, receipt: string) => {
+export const createRazorpayOrder = async (amount: number, receipt: string, currency = 'INR') => {
   if (!supabase) {
     return { data: null, error: new Error('Supabase is not configured.') };
   }
 
-  return supabase.functions.invoke<RazorpayOrder>('razorpay-payment', {
+  return supabase.functions.invoke<RazorpayOrder>('create-order', {
     body: {
-      action: 'create-order',
       amount,
+      currency,
       receipt,
     },
   });
@@ -84,19 +88,24 @@ export const verifyRazorpayPayment = async (payment: RazorpayCheckoutResponse) =
     return { data: null, error: new Error('Supabase is not configured.') };
   }
 
-  return supabase.functions.invoke<{ verified: boolean }>('razorpay-payment', {
+  return supabase.functions.invoke<{ success: boolean }>('verify-payment', {
     body: {
-      action: 'verify-payment',
       ...payment,
     },
   });
 };
 
-export const openRazorpayCheckout = (options: RazorpayCheckoutOptions) => {
+export const openRazorpayCheckout = (
+  options: RazorpayCheckoutOptions,
+  onPaymentFailed?: (response: unknown) => void,
+) => {
   if (!window.Razorpay) {
     throw new Error('Razorpay Checkout is not loaded.');
   }
 
   const checkout = new window.Razorpay(options);
+  if (onPaymentFailed && 'on' in checkout && typeof checkout.on === 'function') {
+    checkout.on('payment.failed', onPaymentFailed);
+  }
   checkout.open();
 };

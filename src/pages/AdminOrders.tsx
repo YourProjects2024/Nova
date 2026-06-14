@@ -5,6 +5,35 @@ import { isSupabaseConfigured, supabase } from '../lib/supabase';
 
 const ORDER_STATUSES: OrderStatus[] = ['paid', 'processing', 'shipped', 'delivered', 'cancelled'];
 
+const getOrderItemProduct = (item: unknown) => {
+  if (!item || typeof item !== 'object') {
+    return {
+      id: 'unknown',
+      name: 'Unknown product',
+      price: 0,
+      weight: 'N/A',
+    };
+  }
+
+  const record = item as Record<string, any>;
+  const product = record.product && typeof record.product === 'object'
+    ? record.product as Record<string, any>
+    : record;
+
+  return {
+    id: String(product.id || product.name || 'unknown'),
+    name: String(product.name || product.title || 'Unknown product'),
+    price: Number(product.price || record.price || 0),
+    weight: String(product.weight || record.weight || 'N/A'),
+  };
+};
+
+const getOrderItemQuantity = (item: unknown) => {
+  if (!item || typeof item !== 'object') return 1;
+  const quantity = Number((item as Record<string, any>).quantity);
+  return Number.isFinite(quantity) && quantity > 0 ? quantity : 1;
+};
+
 export const AdminOrders: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -299,18 +328,23 @@ export const AdminOrders: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="border-t border-sage-100 pt-4 space-y-2">
-                  <h3 className="text-xs font-bold text-sage-400 uppercase tracking-wider">Products</h3>
-                  {order.items.map((item) => (
-                    <div key={`${order.id}-${item.product.id}`} className="flex items-center justify-between gap-4 text-sm">
-                      <div>
-                        <p className="font-semibold text-sage-800">{item.product.name}</p>
-                        <p className="text-xs text-sage-500">Qty {item.quantity} • {item.product.weight}</p>
-                      </div>
-                      <p className="font-bold text-sage-800">₹{item.product.price * item.quantity}</p>
-                    </div>
-                  ))}
-                </div>
+	                <div className="border-t border-sage-100 pt-4 space-y-2">
+	                  <h3 className="text-xs font-bold text-sage-400 uppercase tracking-wider">Products</h3>
+	                  {order.items.map((item, index) => {
+	                    const product = getOrderItemProduct(item);
+	                    const quantity = getOrderItemQuantity(item);
+
+	                    return (
+	                      <div key={`${order.id}-${product.id}-${index}`} className="flex items-center justify-between gap-4 text-sm">
+	                        <div>
+	                          <p className="font-semibold text-sage-800">{product.name}</p>
+	                          <p className="text-xs text-sage-500">Qty {quantity} • {product.weight}</p>
+	                        </div>
+	                        <p className="font-bold text-sage-800">₹{product.price * quantity}</p>
+	                      </div>
+	                    );
+	                  })}
+	                </div>
               </article>
             ))}
           </div>

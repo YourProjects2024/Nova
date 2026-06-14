@@ -22,7 +22,7 @@ drop policy if exists "Allow public order creation" on public.orders;
 create policy "Allow public order creation"
 on public.orders
 for insert
-to anon
+to public
 with check (true);
 
 drop policy if exists "Allow admins to read orders" on public.orders;

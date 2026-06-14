@@ -43,10 +43,11 @@ Orders are inserted after successful payment. The admin panel can view all order
 supabase secrets set RAZORPAY_KEY_ID=rzp_test_or_live_key_id RAZORPAY_KEY_SECRET=your_key_secret
 ```
 
-4. Deploy the payment function:
+4. Deploy the payment functions:
 
 ```bash
-supabase functions deploy razorpay-payment
+supabase functions deploy create-order
+supabase functions deploy verify-payment
 ```
 
-The browser opens Razorpay Checkout with the public Key ID. The Supabase Edge Function creates Razorpay orders and verifies payment signatures with the secret key before the app saves the order.
+The browser opens Razorpay Checkout with the public Key ID. Supabase Edge Functions create Razorpay orders and verify payment signatures with the secret key before the app saves the order.

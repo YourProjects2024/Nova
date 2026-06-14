@@ -94,7 +94,8 @@ export const Checkout: React.FC = () => {
     try {
       await loadRazorpayCheckout();
 
-      const { data: razorpayOrder, error } = await createRazorpayOrder(grandTotal, orderId);
+      const amountInPaise = Math.round(grandTotal * 100);
+      const { data: razorpayOrder, error } = await createRazorpayOrder(amountInPaise, orderId);
 
       if (error || !razorpayOrder) {
         throw new Error(error?.message || 'Could not create Razorpay order.');
@@ -107,7 +108,8 @@ export const Checkout: React.FC = () => {
         name: 'NEVA Personal Care',
         description: `Order ${orderId}`,
         image: '/Nova/nova.PNG',
-        order_id: razorpayOrder.id,
+        order_id: razorpayOrder.order_id,
+        method: 'upi',
         prefill: {
           name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
@@ -126,6 +128,12 @@ export const Checkout: React.FC = () => {
         modal: {
           ondismiss: () => setIsPaymentStarting(false),
         },
+      }, () => {
+        setFormErrors((current) => ({
+          ...current,
+          payment: 'Payment failed. Please try again or choose another payment method.',
+        }));
+        setIsPaymentStarting(false);
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Could not start Razorpay checkout.';

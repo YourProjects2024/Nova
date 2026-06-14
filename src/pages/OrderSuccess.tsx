@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { CheckCircle2, MessageCircle, Calendar, CreditCard, ShieldCheck, ShoppingBag, ArrowRight } from 'lucide-react';
+import { CheckCircle2, MessageCircle, Calendar, CreditCard, ShieldCheck, ShoppingBag, Download } from 'lucide-react';
+import logoImage from '../assets/nova.png';
 
 interface OrderData {
   orderId: string;
@@ -51,6 +52,141 @@ export const OrderSuccess: React.FC = () => {
     const message = `Hi NEVA team, I want to track my order.\nOrder ID: ${order.orderId}\nName: ${order.customer.firstName} ${order.customer.lastName}\nTotal Amount: ₹${order.total}`;
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const pdfText = (value: string | number) =>
+    String(value)
+      .replace(/[^\x20-\x7E]/g, ' ')
+      .replace(/\\/g, '\\\\')
+      .replace(/\(/g, '\\(')
+      .replace(/\)/g, '\\)');
+
+  const loadLogoForPdf = () =>
+    new Promise<{ binary: string; width: number; height: number }>((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+
+        const context = canvas.getContext('2d');
+        if (!context) {
+          reject(new Error('Could not prepare invoice logo.'));
+          return;
+        }
+
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+        const binary = atob(dataUrl.split(',')[1]);
+        resolve({ binary, width: canvas.width, height: canvas.height });
+      };
+      image.onerror = () => reject(new Error('Could not load invoice logo.'));
+      image.src = logoImage;
+    });
+
+  const buildInvoicePdf = async () => {
+    const logo = await loadLogoForPdf();
+    const content: string[] = [];
+    const write = (text: string | number, x: number, y: number, size = 10) => {
+      content.push(`BT /F1 ${size} Tf ${x} ${y} Td (${pdfText(text)}) Tj ET`);
+    };
+    const line = (x1: number, y1: number, x2: number, y2: number) => {
+      content.push(`${x1} ${y1} m ${x2} ${y2} l S`);
+    };
+    content.push('q 44 0 0 44 54 752 cm /Logo Do Q');
+    write('NEVA', 116, 786, 26);
+    write('Personal Care', 118, 768, 11);
+    write('Certified organic, paraben-free and cruelty-free skincare', 118, 752, 9);
+    write('Email: services.neva@gmail.com', 118, 734, 9);
+    write('Phone / WhatsApp: +91 9998318359', 118, 720, 9);
+    write('Website: yourprojects2024.github.io/Nova', 118, 706, 9);
+
+    write('Tax Invoice / Receipt', 385, 786, 16);
+    write(`Order ID: ${order.orderId}`, 385, 762, 10);
+    write(`Payment ID: ${order.paymentId}`, 385, 746, 10);
+    write(`Payment Mode: Razorpay Online`, 385, 730, 10);
+    write(`Date: ${order.date}`, 385, 714, 10);
+    line(50, 690, 545, 690);
+
+    write('Bill To / Ship To', 50, 660, 14);
+    write(`${order.customer.firstName} ${order.customer.lastName}`, 50, 640, 11);
+    write(`${order.customer.address}, ${order.customer.city}`, 50, 624, 10);
+    write(`${order.customer.state} - ${order.customer.zipCode}`, 50, 608, 10);
+    write(`Email: ${order.customer.email}`, 50, 592, 10);
+    write(`Phone: +91 ${order.customer.phone}`, 50, 576, 10);
+
+    write('Product', 50, 540, 10);
+    write('Qty', 330, 540, 10);
+    write('Price', 390, 540, 10);
+    write('Total', 470, 540, 10);
+    line(50, 530, 545, 530);
+
+    let y = 510;
+    order.items.forEach((item) => {
+      write(item.product.name, 50, y, 10);
+      write(item.product.weight, 50, y - 14, 8);
+      write(item.quantity, 330, y, 10);
+      write(`INR ${item.product.price}`, 390, y, 10);
+      write(`INR ${item.product.price * item.quantity}`, 470, y, 10);
+      y -= 34;
+    });
+
+    line(50, y + 12, 545, y + 12);
+    y -= 12;
+    write('Subtotal', 360, y, 10);
+    write(`INR ${order.subtotal}`, 470, y, 10);
+    y -= 18;
+    write('Shipping', 360, y, 10);
+    write(order.shippingFee === 0 ? 'Free' : `INR ${order.shippingFee}`, 470, y, 10);
+    y -= 24;
+    line(360, y + 12, 545, y + 12);
+    write('Total Paid', 360, y, 12);
+    write(`INR ${order.total}`, 470, y, 12);
+
+    write('Thank you for choosing NEVA.', 50, 80, 10);
+    write('For support: services.neva@gmail.com | +91 9998318359', 50, 62, 9);
+
+    const stream = content.join('\n');
+    const objects = [
+      '<< /Type /Catalog /Pages 2 0 R >>',
+      '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+      '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> /XObject << /Logo 6 0 R >> >> /Contents 5 0 R >>',
+      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+      `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`,
+      `<< /Type /XObject /Subtype /Image /Width ${logo.width} /Height ${logo.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${logo.binary.length} >>\nstream\n${logo.binary}\nendstream`,
+    ];
+
+    let pdf = '%PDF-1.4\n';
+    const offsets = [0];
+    objects.forEach((object, index) => {
+      offsets.push(pdf.length);
+      pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+    });
+
+    const xrefOffset = pdf.length;
+    pdf += `xref\n0 ${objects.length + 1}\n`;
+    pdf += '0000000000 65535 f \n';
+    offsets.slice(1).forEach((offset) => {
+      pdf += `${String(offset).padStart(10, '0')} 00000 n \n`;
+    });
+    pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+
+    return Uint8Array.from(pdf, (character) => character.charCodeAt(0) & 255);
+  };
+
+  const handleDownloadInvoice = async () => {
+    const blob = new Blob([await buildInvoicePdf()], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `NEVA-Invoice-${order.orderId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -106,9 +242,19 @@ export const OrderSuccess: React.FC = () => {
 
         {/* Invoice / Receipt Section */}
         <div className="bg-white p-6 sm:p-10 rounded-2xl border border-sage-100 shadow-xs space-y-6">
-          <h3 className="font-serif text-lg font-bold text-sage-800 border-b border-sage-100 pb-3">
-            Invoice Receipt
-          </h3>
+          <div className="border-b border-sage-100 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h3 className="font-serif text-lg font-bold text-sage-800">
+              Invoice Receipt
+            </h3>
+            <button
+              type="button"
+              onClick={handleDownloadInvoice}
+              className="bg-sage-700 hover:bg-sage-800 text-cream-50 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download Invoice</span>
+            </button>
+          </div>
 
           {/* Meta Details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm text-sage-600">
