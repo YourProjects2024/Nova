@@ -111,7 +111,7 @@ export const AdminOrders: React.FC = () => {
           <Lock className="w-10 h-10 text-sage-600 mx-auto" />
           <h1 className="font-serif text-2xl font-bold text-sage-800">Supabase is not configured</h1>
           <p className="text-sm text-sage-600">
-            Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to your environment before using the admin panel.
+            Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` to your environment before using the admin panel.
           </p>
         </div>
       </div>

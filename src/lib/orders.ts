@@ -44,6 +44,17 @@ export const createOrder = async (order: CreateOrderInput) => {
     return { data: null, error: new Error('Supabase is not configured.') };
   }
 
+  const orderItems = order.items.map((item) => ({
+    product: {
+      id: item.product.id,
+      name: item.product.name,
+      price: item.product.price,
+      weight: item.product.weight,
+      image: item.product.image,
+    },
+    quantity: item.quantity,
+  }));
+
   return supabase
     .from('orders')
     .insert({
@@ -51,13 +62,11 @@ export const createOrder = async (order: CreateOrderInput) => {
       payment_id: order.paymentId,
       status: 'paid',
       customer: order.customer,
-      items: order.items,
+      items: orderItems,
       subtotal: order.subtotal,
       shipping_fee: order.shippingFee,
       total: order.total,
-    })
-    .select()
-    .single();
+    });
 };
 
 export const fetchOrders = async () => {

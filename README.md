@@ -24,10 +24,29 @@ npm run build
 
 ```bash
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
-VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
+VITE_RAZORPAY_KEY_ID=rzp_test_or_live_key_id
 ```
 
 5. In Supabase Authentication, create an admin user with email and password.
 6. Visit `/#/admin` in the app and sign in with that admin user.
 
 Orders are inserted after successful payment. The admin panel can view all orders and update order status/notes.
+
+## Razorpay Setup
+
+1. Create API keys in Razorpay Dashboard.
+2. Add the Key ID to `.env` or `.env.local` as `VITE_RAZORPAY_KEY_ID`.
+3. Add the Key ID and Key Secret to Supabase Edge Function secrets:
+
+```bash
+supabase secrets set RAZORPAY_KEY_ID=rzp_test_or_live_key_id RAZORPAY_KEY_SECRET=your_key_secret
+```
+
+4. Deploy the payment function:
+
+```bash
+supabase functions deploy razorpay-payment
+```
+
+The browser opens Razorpay Checkout with the public Key ID. The Supabase Edge Function creates Razorpay orders and verifies payment signatures with the secret key before the app saves the order.

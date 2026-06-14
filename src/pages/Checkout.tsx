@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { RazorpayModal } from '../components/RazorpayModal';
 import { ArrowLeft, ShieldCheck, Mail, Phone, User, MapPin, CreditCard, Lock, HelpCircle } from 'lucide-react';
 import { createOrder } from '../lib/orders';
+import {
+  createRazorpayOrder,
+  isRazorpayConfigured,
+  loadRazorpayCheckout,
+  openRazorpayCheckout,
+  razorpayKeyId,
+  verifyRazorpayPayment,
+} from '../lib/razorpay';
 
 export const Checkout: React.FC = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -20,10 +27,8 @@ export const Checkout: React.FC = () => {
     zipCode: '',
   });
 
-  const [isRazorpayOpen, setIsRazorpayOpen] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [useRealRazorpay, setUseRealRazorpay] = useState(false);
-  const [razorpayKey, setRazorpayKey] = useState('');
+  const [isPaymentStarting, setIsPaymentStarting] = useState(false);
 
   const FREE_SHIPPING_THRESHOLD = 499;
   const isFreeShipping = cartTotal >= FREE_SHIPPING_THRESHOLD;
@@ -63,15 +68,15 @@ export const Checkout: React.FC = () => {
       errors.zipCode = 'Enter a valid 6-digit PIN code';
     }
 
-    if (useRealRazorpay && !razorpayKey.trim()) {
-      errors.razorpayKey = 'Please enter your Razorpay Key ID to use the real gateway';
+    if (!isRazorpayConfigured) {
+      errors.payment = 'Razorpay is not configured. Add VITE_RAZORPAY_KEY_ID and deploy the Supabase payment function.';
     }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) {
       // Scroll to first error
@@ -83,66 +88,62 @@ export const Checkout: React.FC = () => {
       return;
     }
 
-    if (useRealRazorpay) {
-      // Load real Razorpay script and open it
-      loadRealRazorpay();
-    } else {
-      // Open simulated Razorpay modal
-      setIsRazorpayOpen(true);
-    }
-  };
+    setIsPaymentStarting(true);
+    const orderId = `NEVA-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  // Real Razorpay Integration script loader
-  const loadRealRazorpay = () => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    script.onload = () => {
-      const options = {
-        key: razorpayKey, // Enter real Key ID
-        amount: grandTotal * 100, // Razorpay takes amount in paise (1 INR = 100 Paise)
-        currency: 'INR',
+    try {
+      await loadRazorpayCheckout();
+
+      const { data: razorpayOrder, error } = await createRazorpayOrder(grandTotal, orderId);
+
+      if (error || !razorpayOrder) {
+        throw new Error(error?.message || 'Could not create Razorpay order.');
+      }
+
+      openRazorpayCheckout({
+        key: razorpayKeyId!,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
         name: 'NEVA Personal Care',
-        description: 'Order Payment',
-        image: '/favicon.svg',
-        handler: function (response: any) {
-          // Handle success
-          handlePaymentSuccess(response.razorpay_payment_id);
-        },
+        description: `Order ${orderId}`,
+        image: '/Nova/nova.PNG',
+        order_id: razorpayOrder.id,
         prefill: {
           name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
           contact: formData.phone,
         },
+        notes: {
+          order_id: orderId,
+          customer_email: formData.email,
+        },
         theme: {
-          color: '#5f7464', // NEVA Sage Green brand color
+          color: '#5f7464',
+        },
+        handler: (response) => {
+          handlePaymentSuccess(orderId, response.razorpay_payment_id, response);
         },
         modal: {
-          ondismiss: function () {
-            alert('Payment cancelled by user.');
-          }
-        }
-      };
-      const rzp = (window as any).Razorpay ? new (window as any).Razorpay(options) : null;
-      if (rzp) {
-        rzp.open();
-      } else {
-        alert('Failed to load Razorpay. Falling back to secure simulated checkout.');
-        setIsRazorpayOpen(true);
-      }
-    };
-    script.onerror = () => {
-      alert('Error loading Razorpay script. Falling back to simulated checkout.');
-      setIsRazorpayOpen(true);
-    };
-    document.body.appendChild(script);
+          ondismiss: () => setIsPaymentStarting(false),
+        },
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not start Razorpay checkout.';
+      setFormErrors((current) => ({ ...current, payment: message }));
+      setIsPaymentStarting(false);
+    }
   };
 
-  const handlePaymentSuccess = async (paymentId: string) => {
-    setIsRazorpayOpen(false);
-
+  const handlePaymentSuccess = async (
+    orderId: string,
+    paymentId: string,
+    paymentResponse?: {
+      razorpay_order_id: string;
+      razorpay_payment_id: string;
+      razorpay_signature: string;
+    },
+  ) => {
     // Save order details to sessionStorage to display on success page
-    const orderId = `NEVA-${Math.floor(100000 + Math.random() * 900000)}`;
     const orderData = {
       orderId,
       paymentId,
@@ -160,6 +161,17 @@ export const Checkout: React.FC = () => {
       }),
     };
 
+    if (paymentResponse) {
+      const { error } = await verifyRazorpayPayment(paymentResponse);
+
+      if (error) {
+        console.error('Failed to verify Razorpay payment:', error);
+        alert(`Payment verification failed.\n\nReason: ${error.message}\n\nPlease contact NEVA support with your payment ID.`);
+        setIsPaymentStarting(false);
+        return;
+      }
+    }
+
     const { error } = await createOrder({
       orderId,
       paymentId,
@@ -172,7 +184,9 @@ export const Checkout: React.FC = () => {
 
     if (error) {
       console.error('Failed to save order to Supabase:', error);
-      alert('Payment succeeded, but we could not save the order online. Please contact NEVA support with your payment ID.');
+      alert(`Payment succeeded, but we could not save the order online.\n\nReason: ${error.message}\n\nPlease contact NEVA support with your payment ID.`);
+      setIsPaymentStarting(false);
+      return;
     }
 
     sessionStorage.setItem('neva_latest_order', JSON.stringify(orderData));
@@ -181,12 +195,8 @@ export const Checkout: React.FC = () => {
     clearCart();
 
     // Redirect to success page
+    setIsPaymentStarting(false);
     navigate('/order-success');
-  };
-
-  const handlePaymentFailure = (errorMsg: string) => {
-    setIsRazorpayOpen(false);
-    alert(`Payment Failed: ${errorMsg}. Please try again.`);
   };
 
   if (cartItems.length === 0) {
@@ -392,55 +402,20 @@ export const Checkout: React.FC = () => {
                 </div>
               </div>
 
-              {/* Razorpay Gateway Switch (Advanced Feature) */}
-              <div className="bg-sage-50 p-5 rounded-xl border border-sage-200 space-y-4">
+              <div className="bg-sage-50 p-5 rounded-xl border border-sage-200 space-y-3">
                 <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    id="useRealRazorpay"
-                    checked={useRealRazorpay}
-                    onChange={(e) => {
-                      setUseRealRazorpay(e.target.checked);
-                      setFormErrors((prev) => {
-                        const updated = { ...prev };
-                        delete updated.razorpayKey;
-                        return updated;
-                      });
-                    }}
-                    className="mt-1.5 h-4 w-4 rounded-md border-sage-300 text-sage-600 focus:ring-sage-500 cursor-pointer"
-                  />
-                  <div className="flex-1">
-                    <label htmlFor="useRealRazorpay" className="block text-sm font-bold text-sage-800 cursor-pointer">
-                      Use Real Razorpay Gateway
-                    </label>
+                  <ShieldCheck className="w-5 h-5 text-sage-700 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-sm font-bold text-sage-800">Secure Razorpay Payment</h4>
                     <p className="text-xs text-sage-600 leading-relaxed mt-0.5">
-                      Check this box if you want to connect your actual Razorpay Merchant Account. If left unchecked, we will load a high-fidelity frontend checkout simulator that triggers order completion flawlessly.
+                      Pay safely with UPI, cards, netbanking, and wallets. Your order is saved only after Razorpay confirms the payment.
                     </p>
                   </div>
                 </div>
 
-                {useRealRazorpay && (
-                  <div className="pl-7 space-y-2 animate-fadeIn">
-                    <label className="block text-xs font-semibold text-sage-700">
-                      Razorpay Key ID *
-                    </label>
-                    <input
-                      type="text"
-                      name="razorpayKey"
-                      placeholder="e.g., rzp_test_xxxxxxxxxxxxxx"
-                      value={razorpayKey}
-                      onChange={(e) => setRazorpayKey(e.target.value)}
-                      className={`w-full bg-white border rounded-lg p-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-sage-500 ${
-                        formErrors.razorpayKey ? 'border-rose-400 focus:ring-rose-200' : 'border-sage-200'
-                      }`}
-                    />
-                    {formErrors.razorpayKey ? (
-                      <p className="text-rose-500 text-[10px]">{formErrors.razorpayKey}</p>
-                    ) : (
-                      <p className="text-[10px] text-sage-500">
-                        You can find this in your Razorpay Dashboard &gt; Settings &gt; API Keys.
-                      </p>
-                    )}
+                {formErrors.payment && (
+                  <div className="bg-rose-50 border border-rose-100 text-rose-700 rounded-lg px-3 py-2 text-xs">
+                    {formErrors.payment}
                   </div>
                 )}
               </div>
@@ -448,10 +423,11 @@ export const Checkout: React.FC = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-sage-700 hover:bg-sage-800 text-cream-50 font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm tracking-wide cursor-pointer"
+                disabled={isPaymentStarting}
+                className="w-full bg-sage-700 hover:bg-sage-800 disabled:opacity-60 disabled:cursor-not-allowed text-cream-50 font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-sm tracking-wide cursor-pointer"
               >
                 <CreditCard className="w-4 h-4" />
-                <span>Proceed to Pay ₹{grandTotal.toFixed(2)}</span>
+                <span>{isPaymentStarting ? 'Opening Razorpay...' : `Proceed to Pay ₹${grandTotal.toFixed(2)}`}</span>
               </button>
             </form>
           </div>
@@ -529,17 +505,6 @@ export const Checkout: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Razorpay Integration Modal */}
-      <RazorpayModal
-        isOpen={isRazorpayOpen}
-        onClose={() => setIsRazorpayOpen(false)}
-        amount={grandTotal}
-        email={formData.email}
-        phone={formData.phone}
-        onSuccess={handlePaymentSuccess}
-        onFailure={handlePaymentFailure}
-      />
     </div>
   );
 };
