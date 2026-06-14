@@ -15,6 +15,11 @@ interface RazorpayCheckoutResponse {
   razorpay_signature: string;
 }
 
+interface CheckoutItemInput {
+  productId: string;
+  quantity: number;
+}
+
 interface RazorpayCheckoutOptions {
   key: string;
   amount: number;
@@ -43,6 +48,9 @@ export interface RazorpayOrder {
   order_id: string;
   amount: number;
   currency: string;
+  subtotal: number;
+  shipping_fee: number;
+  total: number;
 }
 
 const RAZORPAY_SCRIPT_URL = 'https://checkout.razorpay.com/v1/checkout.js';
@@ -69,28 +77,40 @@ export const loadRazorpayCheckout = () => {
   return razorpayScriptPromise;
 };
 
-export const createRazorpayOrder = async (amount: number, receipt: string, currency = 'INR') => {
+export const createRazorpayOrder = async (
+  items: CheckoutItemInput[],
+  receipt: string,
+  currency = 'INR',
+) => {
   if (!supabase) {
     return { data: null, error: new Error('Supabase is not configured.') };
   }
 
   return supabase.functions.invoke<RazorpayOrder>('create-order', {
     body: {
-      amount,
+      items,
       currency,
       receipt,
     },
   });
 };
 
-export const verifyRazorpayPayment = async (payment: RazorpayCheckoutResponse) => {
+export const verifyRazorpayPayment = async (
+  payment: RazorpayCheckoutResponse,
+  orderDetails: {
+    receipt: string;
+    customer: unknown;
+    items: CheckoutItemInput[];
+  },
+) => {
   if (!supabase) {
     return { data: null, error: new Error('Supabase is not configured.') };
   }
 
-  return supabase.functions.invoke<{ success: boolean }>('verify-payment', {
+  return supabase.functions.invoke<{ success: boolean; order?: unknown }>('verify-payment', {
     body: {
       ...payment,
+      ...orderDetails,
     },
   });
 };

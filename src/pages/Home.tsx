@@ -14,7 +14,6 @@ import {
   ShieldCheck,
   Mail,
   Phone,
-  Send,
   Calendar,
   X
 } from 'lucide-react';
@@ -35,8 +34,6 @@ const beforeAfterImages = [
 export const Home: React.FC = () => {
   const { addToCart } = useCart();
   const [activeTab, setActiveTab] = useState<'description' | 'benefits' | 'ideal' | 'howTo' | 'ingredients'>('description');
-  const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [newsletterSuccess, setNewsletterNewsletterSuccess] = useState(false);
   const [addedProductId, setAddedProductId] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedBeforeAfterImage, setSelectedBeforeAfterImage] = useState<(typeof beforeAfterImages)[number] | null>(null);
@@ -52,15 +49,6 @@ export const Home: React.FC = () => {
   const handleOpenProduct = (product: Product) => {
     setActiveTab('description');
     setSelectedProduct(product);
-  };
-
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newsletterEmail.trim()) {
-      setNewsletterNewsletterSuccess(true);
-      setNewsletterEmail('');
-      setTimeout(() => setNewsletterNewsletterSuccess(false), 5000);
-    }
   };
 
   return (
@@ -291,52 +279,21 @@ export const Home: React.FC = () => {
       {/* 5. CONTACT SECTION */}
       <section id="contact" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-          {/* Left: Newsletter & Support Text */}
+          {/* Left: Support Text */}
           <div className="lg:col-span-7 space-y-8">
             <div className="space-y-4">
-              <span className="text-gold-600 font-semibold tracking-widest text-xs uppercase block">Newsletter</span>
+              <span className="text-gold-600 font-semibold tracking-widest text-xs uppercase block">Support</span>
               <h2 className="font-serif text-3xl sm:text-4xl font-bold text-sage-800 tracking-tight">
                 We love skincare talk
               </h2>
               <div className="w-16 h-1 bg-gold-500 rounded-full"></div>
               <p className="text-sage-600 text-sm sm:text-base leading-relaxed max-w-xl">
-                Leave your email and never miss a glow-up! Hot deals, skincare secrets, and news you’ll actually want.
+                Need help choosing a product, tracking an order, or understanding your skincare routine? Our team is here to help.
               </p>
             </div>
 
-            {/* Email Subscription Form */}
-            <form onSubmit={handleNewsletterSubmit} className="max-w-md">
-              {newsletterSuccess ? (
-                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-xl flex items-start gap-3 text-xs sm:text-sm animate-fadeIn">
-                  <ShieldCheck className="w-5 h-5 shrink-0 text-emerald-600 mt-0.5" />
-                  <div>
-                    <strong className="font-bold">Glow-up newsletter joined!</strong>
-                    <p className="mt-0.5 text-emerald-700">Thank you! Welcome to the family. Check your inbox for hot deals soon.</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="email"
-                    required
-                    placeholder="Enter your email address"
-                    value={newsletterEmail}
-                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                    className="flex-1 bg-white border border-sage-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:ring-2 focus:ring-sage-500"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-sage-700 hover:bg-sage-800 text-cream-50 font-bold px-6 py-3 rounded-xl shadow-md transition-colors text-sm flex items-center justify-center gap-2 shrink-0 cursor-pointer"
-                  >
-                    <span>Subscribe</span>
-                    <Send className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-            </form>
-
             {/* Additional Support Text */}
-            <div className="space-y-4 pt-6 border-t border-sage-100 max-w-xl">
+            <div className="space-y-4 pt-2 max-w-xl">
               <h4 className="font-serif font-bold text-sage-800 text-lg">Still using chemicals?</h4>
               <p className="text-sage-600 text-sm leading-relaxed">
                 Let’s upgrade your routine. Your skin questions answered—reach us anytime at <a href="mailto:services.neva@gmail.com" className="text-gold-600 font-semibold hover:underline">services.neva@gmail.com</a>

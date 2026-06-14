@@ -19,11 +19,6 @@ create table if not exists public.orders (
 alter table public.orders enable row level security;
 
 drop policy if exists "Allow public order creation" on public.orders;
-create policy "Allow public order creation"
-on public.orders
-for insert
-to public
-with check (true);
 
 drop policy if exists "Allow admins to read orders" on public.orders;
 create policy "Allow admins to read orders"

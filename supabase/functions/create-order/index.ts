@@ -1,3 +1,5 @@
+import { calculateOrderTotals } from '../_shared/catalog.ts';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -40,11 +42,11 @@ Deno.serve(async (request) => {
 
   try {
     const body = await request.json();
-    const amount = Number(body.amount);
     const currency = typeof body.currency === 'string' ? body.currency : 'INR';
     const receipt = typeof body.receipt === 'string' ? body.receipt : '';
+    const totals = calculateOrderTotals(body.items);
 
-    if (!Number.isInteger(amount) || amount < 100) {
+    if (totals.amountInPaise < 100) {
       return jsonResponse({ error: 'Amount must be at least 100 paise.' }, 400);
     }
 
@@ -59,7 +61,7 @@ Deno.serve(async (request) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        amount,
+        amount: totals.amountInPaise,
         currency,
         receipt,
         payment_capture: 1,
@@ -80,6 +82,9 @@ Deno.serve(async (request) => {
       order_id: result.id,
       amount: result.amount,
       currency: result.currency,
+      subtotal: totals.subtotal,
+      shipping_fee: totals.shippingFee,
+      total: totals.total,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Could not create Razorpay order.';

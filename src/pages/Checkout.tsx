@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { ArrowLeft, ShieldCheck, Mail, Phone, User, MapPin, CreditCard, Lock, HelpCircle } from 'lucide-react';
-import { createOrder } from '../lib/orders';
 import {
   createRazorpayOrder,
   isRazorpayConfigured,
@@ -34,6 +33,10 @@ export const Checkout: React.FC = () => {
   const isFreeShipping = cartTotal >= FREE_SHIPPING_THRESHOLD;
   const shippingFee = isFreeShipping ? 0 : 50;
   const grandTotal = cartTotal + shippingFee;
+  const checkoutItems = cartItems.map((item) => ({
+    productId: item.product.id,
+    quantity: item.quantity,
+  }));
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -94,8 +97,7 @@ export const Checkout: React.FC = () => {
     try {
       await loadRazorpayCheckout();
 
-      const amountInPaise = Math.round(grandTotal * 100);
-      const { data: razorpayOrder, error } = await createRazorpayOrder(amountInPaise, orderId);
+      const { data: razorpayOrder, error } = await createRazorpayOrder(checkoutItems, orderId);
 
       if (error || !razorpayOrder) {
         throw new Error(error?.message || 'Could not create Razorpay order.');
@@ -170,7 +172,11 @@ export const Checkout: React.FC = () => {
     };
 
     if (paymentResponse) {
-      const { error } = await verifyRazorpayPayment(paymentResponse);
+      const { error } = await verifyRazorpayPayment(paymentResponse, {
+        receipt: orderId,
+        customer: formData,
+        items: checkoutItems,
+      });
 
       if (error) {
         console.error('Failed to verify Razorpay payment:', error);
@@ -178,23 +184,6 @@ export const Checkout: React.FC = () => {
         setIsPaymentStarting(false);
         return;
       }
-    }
-
-    const { error } = await createOrder({
-      orderId,
-      paymentId,
-      customer: formData,
-      items: cartItems,
-      subtotal: cartTotal,
-      shippingFee,
-      total: grandTotal,
-    });
-
-    if (error) {
-      console.error('Failed to save order to Supabase:', error);
-      alert(`Payment succeeded, but we could not save the order online.\n\nReason: ${error.message}\n\nPlease contact NEVA support with your payment ID.`);
-      setIsPaymentStarting(false);
-      return;
     }
 
     sessionStorage.setItem('neva_latest_order', JSON.stringify(orderData));
