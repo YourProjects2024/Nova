@@ -93,6 +93,7 @@ export const Checkout: React.FC = () => {
 
     setIsPaymentStarting(true);
     const orderId = `NEVA-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    sessionStorage.removeItem('neva_latest_order');
 
     try {
       await loadRazorpayCheckout();
@@ -128,9 +129,13 @@ export const Checkout: React.FC = () => {
           handlePaymentSuccess(orderId, response.razorpay_payment_id, response);
         },
         modal: {
-          ondismiss: () => setIsPaymentStarting(false),
+          ondismiss: () => {
+            sessionStorage.removeItem('neva_latest_order');
+            setIsPaymentStarting(false);
+          },
         },
       }, () => {
+        sessionStorage.removeItem('neva_latest_order');
         setFormErrors((current) => ({
           ...current,
           payment: 'Payment failed. Please try again or choose another payment method.',
@@ -172,21 +177,28 @@ export const Checkout: React.FC = () => {
     };
 
     if (paymentResponse) {
-      const { error } = await verifyRazorpayPayment(paymentResponse, {
+      const { data, error } = await verifyRazorpayPayment(paymentResponse, {
         receipt: orderId,
         customer: formData,
         items: checkoutItems,
       });
 
-      if (error) {
+      if (error || !data?.success || !data.order) {
         console.error('Failed to verify Razorpay payment:', error);
-        alert(`Payment verification failed.\n\nReason: ${error.message}\n\nPlease contact NEVA support with your payment ID.`);
+        sessionStorage.removeItem('neva_latest_order');
+        alert(`Payment verification failed.\n\nReason: ${error?.message || 'Payment was not captured or the order was not saved.'}\n\nPlease contact NEVA support with your payment ID.`);
         setIsPaymentStarting(false);
         return;
       }
+    } else {
+      sessionStorage.removeItem('neva_latest_order');
+      alert('Payment verification failed. Please try again.');
+      setIsPaymentStarting(false);
+      return;
     }
 
     sessionStorage.setItem('neva_latest_order', JSON.stringify(orderData));
+    sessionStorage.setItem('neva_latest_order_verified', 'true');
 
     // Clear cart
     clearCart();

@@ -37,10 +37,13 @@ export const OrderSuccess: React.FC = () => {
 
   useEffect(() => {
     const savedOrder = sessionStorage.getItem('neva_latest_order');
-    if (savedOrder) {
+    const isVerified = sessionStorage.getItem('neva_latest_order_verified') === 'true';
+    if (savedOrder && isVerified) {
       setOrder(JSON.parse(savedOrder));
     } else {
       // Fallback if no order exists in session
+      sessionStorage.removeItem('neva_latest_order');
+      sessionStorage.removeItem('neva_latest_order_verified');
       navigate('/');
     }
   }, [navigate]);
