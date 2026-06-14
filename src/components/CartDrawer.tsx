@@ -220,13 +220,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
 
-                  <button
+                  {/* <button
                     onClick={handleWhatsAppCheckout}
                     className="w-full bg-[#25D366] hover:bg-[#20ba59] text-white font-semibold py-3.5 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-sm cursor-pointer"
                   >
                     <MessageCircle className="w-5 h-5 fill-current" />
                     <span>Order via WhatsApp</span>
-                  </button>
+                  </button> */}
                 </div>
 
                 <p className="text-center text-[10px] text-sage-400">
