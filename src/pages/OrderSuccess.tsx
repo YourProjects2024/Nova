@@ -49,7 +49,32 @@ export const OrderSuccess: React.FC = () => {
 
   const handleWhatsAppTrack = () => {
     const phoneNumber = '919998318359';
-    const message = `Hi NEVA team, I want to track my order.\nOrder ID: ${order.orderId}\nName: ${order.customer.firstName} ${order.customer.lastName}\nTotal Amount: ₹${order.total}`;
+    const productSummary = order.items
+      .map((item) => `- ${item.product.name} (${item.product.weight}) x ${item.quantity}: ₹${item.product.price * item.quantity}`)
+      .join('\n');
+    const message = `Hi NEVA team, I want to track my order.
+
+Order ID: ${order.orderId}
+Payment ID: ${order.paymentId}
+Order Date: ${order.date}
+
+Customer:
+${order.customer.firstName} ${order.customer.lastName}
+Phone: +91 ${order.customer.phone}
+Email: ${order.customer.email}
+
+Shipping Address:
+${order.customer.address}
+${order.customer.city}, ${order.customer.state} - ${order.customer.zipCode}
+
+Products:
+${productSummary}
+
+Subtotal: ₹${order.subtotal}
+Shipping: ${order.shippingFee === 0 ? 'Free' : `₹${order.shippingFee}`}
+Total Paid: ₹${order.total}
+
+Please share the tracking/status update for this order.`;
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
