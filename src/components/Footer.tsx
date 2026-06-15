@@ -97,8 +97,8 @@ export const Footer: React.FC = () => {
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-3">
                 <Mail className="w-5 h-5 text-gold-500 shrink-0 mt-0.5" />
-                <a href="mailto:services.neva@gmail.com" className="hover:text-gold-500 transition-colors break-all">
-                  services.neva@gmail.com
+                <a href="mailto:connect.neva@gmail.com" className="hover:text-gold-500 transition-colors break-all">
+                  connect.neva@gmail.com
                 </a>
               </li>
               <li className="flex items-start gap-3">

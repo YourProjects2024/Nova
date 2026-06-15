@@ -10,6 +10,7 @@ import {
   razorpayKeyId,
   verifyRazorpayPayment,
 } from '../lib/razorpay';
+import logoImage from '../assets/nova.png';
 
 export const Checkout: React.FC = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -110,7 +111,7 @@ export const Checkout: React.FC = () => {
         currency: razorpayOrder.currency,
         name: 'NEVA Personal Care',
         description: `Order ${orderId}`,
-        image: '/Nova/nova.PNG',
+        image: logoImage,
         order_id: razorpayOrder.order_id,
         method: 'upi',
         prefill: {

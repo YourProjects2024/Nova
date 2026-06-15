@@ -183,9 +183,9 @@ Current invoice company details:
 
 ```txt
 NEVA Personal Care
-Email: services.neva@gmail.com
+Email: connect.neva@gmail.com
 Phone / WhatsApp: +91 9998318359
-Website: yourprojects2024.github.io/Nova
+Website: nevanatural.in
 ```
 
 ## 9. Environment Variables

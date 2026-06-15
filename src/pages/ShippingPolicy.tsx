@@ -10,7 +10,7 @@ export const ShippingPolicy: React.FC = () => {
             <Truck className="w-6 h-6" />
           </div>
           <h1 className="font-serif text-3xl font-bold text-sage-800">Shipping Policy</h1>
-          <p className="text-xs text-sage-500">Last Updated: March 2025</p>
+          <p className="text-xs text-sage-500">Last Updated: June 2026</p>
           <div className="w-12 h-0.5 bg-gold-500 mx-auto rounded-full"></div>
         </div>
 
@@ -67,7 +67,7 @@ export const ShippingPolicy: React.FC = () => {
               For any questions regarding your shipment, feel free to reach out:
             </p>
             <p className="bg-sage-50 p-4 rounded-lg border border-sage-100 text-xs sm:text-sm font-medium">
-              <strong>Email:</strong> services.neva@gmail.com<br />
+              <strong>Email:</strong> connect.neva@gmail.com<br />
               <strong>WhatsApp Support:</strong> +91 9998318359
             </p>
           </div>

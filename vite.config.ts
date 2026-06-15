@@ -19,10 +19,9 @@ export default defineConfig(async ({ mode }) => {
   }
 
   return {
-    base: "/Nova/",
+    base: "/",
     plugins,
     envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
     define: processEnvDefines,
   };
 });
-

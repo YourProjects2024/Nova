@@ -18,7 +18,7 @@ import {
   X
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import heroImage from '../assets/hero-bg.jpg';
+import heroImage from '../assets/banner2.jpeg';
 import beforeAfterOne from '../assets/b-a1.JPG';
 import beforeAfterTwo from '../assets/b-a2.JPG';
 import beforeAfterThree from '../assets/b-a3.JPG';
@@ -37,8 +37,6 @@ export const Home: React.FC = () => {
   const [addedProductId, setAddedProductId] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedBeforeAfterImage, setSelectedBeforeAfterImage] = useState<(typeof beforeAfterImages)[number] | null>(null);
-
-  const featuredProduct = PRODUCTS.find((p) => p.id === 'neva-face-wash') || PRODUCTS[0];
 
   const handleAddToCart = (product: Product) => {
     addToCart(product, 1);
@@ -60,15 +58,15 @@ export const Home: React.FC = () => {
           <img
             src={heroImage}
             alt="NEVA skincare banner"
-            className="w-full h-full object-cover object-center opacity-30 scale-105 transform motion-safe:animate-pulse"
+            className="w-full h-full object-cover object-center lg:object-right opacity-30 scale-105 transform motion-safe:animate-pulse"
             style={{ animationDuration: '8s' }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-sage-950/90 via-sage-900/70 to-transparent"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20 lg:py-32 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <div className="w-full px-5 sm:px-8 lg:px-14 xl:px-20 relative z-10 py-20 lg:py-32">
           {/* Hero Text */}
-          <div className="lg:col-span-7 space-y-6 sm:space-y-8 text-left">
+          <div className="max-w-2xl space-y-6 sm:space-y-8 text-left">
             <div className="inline-flex items-center gap-2 bg-sage-700/50 border border-sage-600 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-gold-500">
               <Sparkles className="w-3.5 h-3.5" />
               <span>100% Organic Skincare</span>
@@ -104,27 +102,6 @@ export const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Hero Visual */}
-          <div className="lg:col-span-5 hidden lg:block relative">
-            <div className="absolute -inset-4 bg-gold-500/10 rounded-full blur-3xl"></div>
-            <div className="relative border border-sage-700 bg-sage-900/40 backdrop-blur-md rounded-2xl p-8 shadow-2xl flex items-center justify-center">
-              <img
-                src={featuredProduct.image}
-                alt="Neva Face Wash"
-                className="max-h-[380px] object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-xs p-4 rounded-xl border border-sage-100 shadow-lg text-sage-900 flex items-center justify-between">
-                <div>
-                  <h4 className="font-serif font-bold text-sm">Neva Face Wash</h4>
-                  <p className="text-[10px] text-sage-500">Deep Cleansing Formula</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs line-through text-sage-400 font-medium">₹499</p>
-                  <p className="text-sm font-extrabold text-sage-800">₹399</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -296,7 +273,7 @@ export const Home: React.FC = () => {
             <div className="space-y-4 pt-2 max-w-xl">
               <h4 className="font-serif font-bold text-sage-800 text-lg">Still using chemicals?</h4>
               <p className="text-sage-600 text-sm leading-relaxed">
-                Let’s upgrade your routine. Your skin questions answered—reach us anytime at <a href="mailto:services.neva@gmail.com" className="text-gold-600 font-semibold hover:underline">services.neva@gmail.com</a>
+                Let’s upgrade your routine. Your skin questions answered—reach us anytime at <a href="mailto:connect.neva@gmail.com" className="text-gold-600 font-semibold hover:underline">connect.neva@gmail.com</a>
               </p>
               <p className="text-sage-600 text-sm leading-relaxed">
                 Need help choosing? Call us now for instant guidance. Our experts will help you craft the perfect organic skincare routine.
@@ -318,10 +295,10 @@ export const Home: React.FC = () => {
                 <div>
                   <h4 className="text-xs font-bold text-sage-400 uppercase tracking-wider">Email Us</h4>
                   <a
-                    href="mailto:services.neva@gmail.com"
+                    href="mailto:connect.neva@gmail.com"
                     className="text-sm sm:text-base font-semibold text-sage-800 hover:text-gold-600 transition-colors break-all"
                   >
-                    services.neva@gmail.com
+                    connect.neva@gmail.com
                   </a>
                 </div>
               </div>

@@ -10,7 +10,7 @@ export const PrivacyPolicy: React.FC = () => {
             <ShieldAlert className="w-6 h-6" />
           </div>
           <h1 className="font-serif text-3xl font-bold text-sage-800">Privacy Policy</h1>
-          <p className="text-xs text-sage-500">Last Updated: March 2025</p>
+          <p className="text-xs text-sage-500">Last Updated: June 2026</p>
           <div className="w-12 h-0.5 bg-gold-500 mx-auto rounded-full"></div>
         </div>
 
@@ -62,7 +62,7 @@ export const PrivacyPolicy: React.FC = () => {
               If you have any questions or concerns regarding this Privacy Policy, please reach out to us at:
             </p>
             <p className="bg-sage-50 p-4 rounded-lg border border-sage-100 text-xs sm:text-sm font-medium">
-              <strong>Email:</strong> services.neva@gmail.com<br />
+              <strong>Email:</strong> connect.neva@gmail.com<br />
               <strong>Phone:</strong> +91 9998318359
             </p>
           </div>

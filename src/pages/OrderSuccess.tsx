@@ -128,9 +128,9 @@ Please share the tracking/status update for this order.`;
     write('NEVA', 116, 786, 26);
     write('Personal Care', 118, 768, 11);
     write('Certified organic, paraben-free and cruelty-free skincare', 118, 752, 9);
-    write('Email: services.neva@gmail.com', 118, 734, 9);
+    write('Email: connect.neva@gmail.com', 118, 734, 9);
     write('Phone / WhatsApp: +91 9998318359', 118, 720, 9);
-    write('Website: yourprojects2024.github.io/Nova', 118, 706, 9);
+    write('Website: nevanatural.in', 118, 706, 9);
 
     write('Tax Invoice / Receipt', 385, 786, 16);
     write(`Order ID: ${order.orderId}`, 385, 762, 10);
@@ -175,7 +175,7 @@ Please share the tracking/status update for this order.`;
     write(`INR ${order.total}`, 470, y, 12);
 
     write('Thank you for choosing NEVA.', 50, 80, 10);
-    write('For support: services.neva@gmail.com | +91 9998318359', 50, 62, 9);
+    write('For support: connect.neva@gmail.com | +91 9998318359', 50, 62, 9);
 
     const stream = content.join('\n');
     const objects = [

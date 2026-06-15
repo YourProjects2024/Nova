@@ -10,7 +10,7 @@ export const RefundPolicy: React.FC = () => {
             <RefreshCw className="w-6 h-6" />
           </div>
           <h1 className="font-serif text-3xl font-bold text-sage-800">Return, Replacement & Refund Policy</h1>
-          <p className="text-xs text-sage-500">Last Updated: March 2025</p>
+          <p className="text-xs text-sage-500">Last Updated: June 2026</p>
           <div className="w-12 h-0.5 bg-gold-500 mx-auto rounded-full"></div>
         </div>
 
@@ -59,7 +59,7 @@ export const RefundPolicy: React.FC = () => {
               If your order meets the eligibility criteria, please follow these steps:
             </p>
             <ol className="list-decimal pl-5 space-y-1.5 text-xs sm:text-sm text-sage-600">
-              <li>Send an email to <strong>services.neva@gmail.com</strong> or message us on WhatsApp at <strong>+91 9998318359</strong>.</li>
+              <li>Send an email to <strong>connect.neva@gmail.com</strong> or message us on WhatsApp at <strong>+91 9998318359</strong>.</li>
               <li>Include your Order ID, Date of Purchase, and describe the issue.</li>
               <li>Attach the <strong>unboxing video</strong> and clear photos of the damaged item.</li>
             </ol>
@@ -81,7 +81,7 @@ export const RefundPolicy: React.FC = () => {
               For immediate assistance regarding returns and refunds, please contact us:
             </p>
             <p className="bg-sage-50 p-4 rounded-lg border border-sage-100 text-xs sm:text-sm font-medium">
-              <strong>Email:</strong> services.neva@gmail.com<br />
+              <strong>Email:</strong> connect.neva@gmail.com<br />
               <strong>Support Phone / WhatsApp:</strong> +91 9998318359
             </p>
           </div>
